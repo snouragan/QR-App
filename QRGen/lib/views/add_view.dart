@@ -42,8 +42,8 @@ class _AddViewState extends State<AddView> {
               ),
               TextButton(
                   onPressed: () {
-                    widget.addCode(qrName, qrCode);
                     Navigator.pop(context);
+                    widget.addCode(qrName, qrCode);
                   },
                   child: const Text('Add')),
             ],

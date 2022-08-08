@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:qrgen/classes/qrcode.dart';
 
 class QRElement extends StatefulWidget {
-  const QRElement({Key? key, required this.text, r, required this.code})
-      : super(key: key);
+  const QRElement({Key? key, required this.element}) : super(key: key);
 
-  final String text;
-  final String code;
+  final QRCode element;
 
   @override
   State<QRElement> createState() => _QRElementState();
@@ -14,6 +13,16 @@ class QRElement extends StatefulWidget {
 
 class _QRElementState extends State<QRElement> {
   final _textStyle = const TextStyle(fontSize: 24.0);
+
+  String parseDate(DateTime date) {
+    final year = date.year;
+    final month = date.month;
+    final day = date.day;
+    final hour = date.hour;
+    final minute = date.minute < 10 ? '0${date.minute}' : date.minute;
+
+    return '$hour:$minute';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,48 +40,24 @@ class _QRElementState extends State<QRElement> {
               context: context,
               builder: (BuildContext context) {
                 return Container(
-                    height: 480,
-                    margin: const EdgeInsets.all(16.0),
-                    padding: const EdgeInsets.all(64.0),
+                  margin: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(32.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    color: Colors.black,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(32.0),
                     decoration: BoxDecoration(
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(10.0),
-                      color: Colors.black,
                     ),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 240,
-                          padding: const EdgeInsets.all(4.0),
-                          margin: const EdgeInsets.only(bottom: 16.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          child: QrImage(
-                            data: widget.code,
-                            version: 1,
-                          ),
-                        ),
-                        Container(
-                            margin: const EdgeInsets.only(bottom: 32.0),
-                            child: Text(widget.code, style: const TextStyle(fontSize: 14.0))),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                                onPressed: () {},
-                                color: Colors.white,
-                                icon: const Icon(Icons.edit, size: 50.0)),
-                            const SizedBox(width: 50),
-                            IconButton(
-                                onPressed: () {},
-                                color: Colors.white,
-                                icon: const Icon(Icons.delete_rounded,
-                                    size: 50.0)),
-                          ],
-                        )
-                      ],
-                    ));
+                    child: QrImage(
+                      data: widget.element.code,
+                      version: 1,
+                    ),
+                  ),
+                );
               });
         },
         child: Container(
@@ -89,13 +74,22 @@ class _QRElementState extends State<QRElement> {
                 ),
                 child: QrImage(
                   foregroundColor: Colors.white,
-                  data: widget.code,
+                  data: widget.element.code,
                   version: 1,
                 ),
               ),
-              Text(
-                widget.text,
-                style: _textStyle,
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.element.text,
+                    style: _textStyle,
+                  ),
+                  Text(
+                    '${parseDate(widget.element.start)} - ${parseDate(widget.element.end)}',
+                  )
+                ],
               )
             ],
           ),
