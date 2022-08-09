@@ -30,7 +30,7 @@ class _QRElementState extends State<QRElement> {
       height: 150,
       margin: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(4.0),
         color: Colors.black45,
       ),
       child: InkWell(
@@ -72,11 +72,11 @@ class _QRElementState extends State<QRElement> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
-                child: QrImage(
-                  foregroundColor: Colors.white,
-                  data: widget.element.code,
-                  version: 1,
-                ),
+                child: const Icon(
+                  Icons.qr_code,
+                  color: Colors.white,
+                  size: 100,
+                )
               ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,

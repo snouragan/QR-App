@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:http/http.dart' as http;
 
-import 'package:qrgen/views/add_view.dart';
+import 'package:qrgen/widgets/lab_list.dart';
+import 'package:qrgen/widgets/settings.dart';
 import 'package:qrgen/widgets/qr_list.dart';
 
 import '../classes/qrcode.dart';
@@ -17,34 +19,26 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
+  String _user = 'user';
+
+  int _viewIndex = 0;
+
   List<QRCode> _codes = [];
   late Future<void> _initCodes;
 
-  void _addCode(String text, String code) {
-    setState(() async {
-      final start = DateTime.now();
-      final local = start.toLocal();
-      final end = DateTime(local.year, local.month, local.day, local.hour + 2,
-          local.minute, 0, 0, 0);
-
-      final qr = QRCode(text: text, code: code, start: start, end: end);
-      print('adding code ${jsonEncode(qr)}');
-      final response = await http.post(Uri.parse('http://10.0.2.2:3000/codes'),
-          headers: <String, String>{
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          },
-          body: jsonEncode(qr));
-
-      if (response.statusCode == 204) {
-        refreshCodes();
-      } else {
-        throw Exception('Failed to add code');
-      }
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _user = (prefs.getString('user') ?? 'user');
     });
   }
 
+  Future<void> _savePreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user', 'janelu44');
+  }
+
   Future<void> refreshCodes() async {
-    print('refreshing...');
     final cds = await fetchCodes();
     setState(() {
       _codes = cds;
@@ -56,49 +50,94 @@ class _MainViewState extends State<MainView> {
 
     if (response.statusCode == 200) {
       final List<dynamic> codeList = jsonDecode(response.body);
-      print('fetched $codeList');
       return codeList.map((c) => QRCode.fromJson(c)).toList();
     } else {
       throw Exception('Failed to load codes');
     }
   }
 
+  void _navBarTap(int index) {
+    setState(() {
+      _viewIndex = index;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _initCodes = refreshCodes();
+
+    // _savePreferences();
+    _loadPreferences();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Codes'),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(120.0),
+        child: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          flexibleSpace: Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _viewIndex == 0
+                      ? 'Hello, $_user'
+                      : _viewIndex == 1
+                          ? 'My Labs'
+                          : 'Settings',
+                  style: const TextStyle(fontSize: 50.0),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
-      body: FutureBuilder(
-          future: _initCodes,
-          builder: (context, snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.none:
-              case ConnectionState.waiting:
-              case ConnectionState.active:
-                {
-                  return const CircularProgressIndicator();
+      body: _viewIndex == 0
+          ? FutureBuilder(
+              future: _initCodes,
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.none:
+                  case ConnectionState.waiting:
+                  case ConnectionState.active:
+                    {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                  case ConnectionState.done:
+                    {
+                      return RefreshIndicator(
+                          onRefresh: refreshCodes,
+                          child: QRList(codes: _codes));
+                    }
                 }
-              case ConnectionState.done:
-                {
-                  return RefreshIndicator(
-                      onRefresh: refreshCodes, child: QRList(codes: _codes));
-                }
-            }
-          }),
-      floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => AddView(addCode: _addCode)));
-          },
-          backgroundColor: Colors.black,
-          child: const Icon(Icons.add, color: Colors.white)),
+              })
+          : _viewIndex == 1
+              ? const LabList()
+              : const Settings(),
+      bottomNavigationBar: BottomNavigationBar(
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+              icon: Icon(Icons.qr_code, size: 40), label: 'Codes'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_month, size: 40), label: 'Labs'),
+          BottomNavigationBarItem(
+              icon: Icon(
+                Icons.settings,
+                size: 40,
+              ),
+              label: 'Settings'),
+        ],
+        currentIndex: _viewIndex,
+        onTap: _navBarTap,
+      ),
     );
   }
 }
