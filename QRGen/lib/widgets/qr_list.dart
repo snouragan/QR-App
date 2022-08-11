@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:qrgen/classes/qrcode.dart';
+import 'package:qrgen/widgets/page_title.dart';
 import 'package:qrgen/widgets/qr_element.dart';
 
 class QRList extends StatefulWidget {
-  const QRList({Key? key, required this.codes}) : super(key: key);
+  const QRList(
+      {Key? key,
+      required this.codes,
+      required this.user})
+      : super(key: key);
 
   final List<QRCode> codes;
+  final String user;
 
   @override
   State<QRList> createState() => _QRListState();
@@ -16,11 +22,13 @@ class _QRListState extends State<QRList> {
 
   @override
   Widget build(BuildContext context) {
+    final titleElement = PageTitle(text: 'Hello, ${widget.user}');
+
     if (widget.codes.isEmpty) {
       return Stack(
         children: [
           ListView(
-            children: const [],
+            children: [titleElement],
           ),
           FractionallySizedBox(
             heightFactor: 0.8,
@@ -88,26 +96,9 @@ class _QRListState extends State<QRList> {
       return QRElement(element: c);
     }).toList();
 
-    return ListView(children: [..._items, Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: const [
-        SizedBox(
-          height: 20,
-        ),
-        Icon(
-          Icons.keyboard_double_arrow_down_rounded,
-          color: Colors.white54,
-          size: 20,
-        ),
-        Text(
-          'Pull down to refresh',
-          style: TextStyle(
-            fontSize: 20.0,
-            color: Colors.white54,
-          ),
-        ),
-      ],
-    )]);
+    return ListView(children: [
+      titleElement,
+      ..._items,
+    ]);
   }
 }
