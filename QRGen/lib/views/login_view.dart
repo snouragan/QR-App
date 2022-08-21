@@ -3,10 +3,9 @@ import 'package:qrgen/widgets/page_title.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView(
-      {Key? key, required this.loggedIn, required this.logInCallback})
+      {Key? key, required this.logInCallback})
       : super(key: key);
 
-  final bool loggedIn;
   final Function logInCallback;
 
   @override

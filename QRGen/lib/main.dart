@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:qrgen/views/main_view.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,10 +14,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'QRGen',
       theme: ThemeData(
-          colorScheme: const ColorScheme.dark(),
-          bottomSheetTheme: const BottomSheetThemeData(
-            backgroundColor: Colors.transparent,
-          )),
+        colorScheme: const ColorScheme.dark(),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: Colors.transparent,
+        ),
+        dividerColor: Colors.transparent,
+      ),
       home: const MainView(),
     );
   }
