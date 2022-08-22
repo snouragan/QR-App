@@ -14,4 +14,14 @@ class Display {
       ),
     ));
   }
+
+  static String parseDate(DateTime date) {
+    final year = date.year;
+    final month = date.month;
+    final day = date.day;
+    final hour = date.hour;
+    final minute = date.minute < 10 ? '0${date.minute}' : date.minute;
+
+    return '$hour:$minute';
+  }
 }

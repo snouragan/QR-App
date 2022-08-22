@@ -6,10 +6,8 @@ import 'package:qrgen/views/login_view.dart';
 
 import 'package:qrgen/widgets/lab_list.dart';
 import 'package:qrgen/widgets/settings.dart';
-import 'package:qrgen/widgets/qr_list.dart';
 
 import '../utils/preferences.dart';
-
 
 class MainView extends StatefulWidget {
   const MainView({Key? key}) : super(key: key);
@@ -93,13 +91,9 @@ class _MainViewState extends State<MainView> {
         child: !_loggedIn
             ? LoginView(logInCallback: _logIn)
             : _viewIndex == 0
-                ? const QRList()
-                : _viewIndex == 1
-                    ? const LabList()
-                    : Settings(
-                        user: _user,
-                        loggedIn: _loggedIn,
-                        logoutCallback: _logOut),
+                ? const LabList()
+                : Settings(
+                    user: _user, loggedIn: _loggedIn, logoutCallback: _logOut),
       ),
       bottomNavigationBar: _loggedIn
           ? BottomNavigationBar(
@@ -107,9 +101,7 @@ class _MainViewState extends State<MainView> {
               showUnselectedLabels: false,
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.qr_code, size: 40), label: 'Codes'),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.calendar_month, size: 40), label: 'Labs'),
+                    icon: Icon(Icons.qr_code, size: 40), label: 'Labs'),
                 BottomNavigationBarItem(
                     icon: Icon(
                       Icons.settings,

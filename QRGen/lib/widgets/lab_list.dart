@@ -5,6 +5,7 @@ import 'package:qrgen/widgets/page_title.dart';
 import '../classes/lab.dart';
 import '../utils/communication.dart';
 import '../utils/display.dart';
+import '../utils/preferences.dart';
 
 class LabList extends StatefulWidget {
   const LabList({Key? key}) : super(key: key);
@@ -14,6 +15,8 @@ class LabList extends StatefulWidget {
 }
 
 class _LabListState extends State<LabList> {
+  String _username = '';
+
   List<Lab> _labs = [];
   late Future<void> _initLabs;
 
@@ -35,6 +38,13 @@ class _LabListState extends State<LabList> {
 
   Future<void> _init() async {
     _initLabs = dummyFuture();
+
+    final user = await Preferences.getUsername();
+
+    setState(() {
+      _username = user;
+    });
+
     await _refreshLabs();
   }
 
@@ -84,7 +94,7 @@ class _LabListState extends State<LabList> {
 
   @override
   Widget build(BuildContext context) {
-    const titleElement = PageTitle(text: 'My Labs');
+    final titleElement = PageTitle(text: 'Hello, $_username');
 
     return FutureBuilder(
         future: _initLabs,
@@ -104,13 +114,30 @@ class _LabListState extends State<LabList> {
                       ? Stack(
                           children: [
                             ListView(
-                              children: const [titleElement],
+                              children: [titleElement],
                             ),
                             FractionallySizedBox(
-                              heightFactor: 1.0,
+                              heightFactor: 0.5,
                               child: Center(
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: const [
+                                    Text(
+                                      'No upcoming labs',
+                                      style: TextStyle(
+                                          fontSize: 30.0,
+                                          color: Colors.white70),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            FractionallySizedBox(
+                              heightFactor: 0.6,
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     const SizedBox(
                                       height: 100,
@@ -124,36 +151,73 @@ class _LabListState extends State<LabList> {
                               ),
                             ),
                             FractionallySizedBox(
-                              heightFactor: 0.5,
+                              heightFactor: 0.53,
                               child: Center(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: const [
                                     Text(
-                                      'Tap to join a lab',
+                                      'Tap to join a lab ...',
                                       style: TextStyle(
                                           fontSize: 20.0,
-                                          color: Colors.white70),
+                                          color: Colors.white54),
                                     ),
                                   ],
                                 ),
                               ),
-                            )
+                            ),
+                            FractionallySizedBox(
+                              heightFactor: 0.9,
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: const [
+                                    Icon(
+                                      Icons.keyboard_double_arrow_down_rounded,
+                                      color: Colors.white54,
+                                      size: 20,
+                                    ),
+                                    Text(
+                                      '... or pull down to refresh',
+                                      style: TextStyle(
+                                        fontSize: 20.0,
+                                        color: Colors.white54,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         )
                       : ListView.builder(
-                          itemCount: _labs.length + 3,
+                          itemCount: _labs.length + 5,
                           itemBuilder: (BuildContext context, int index) {
                             if (index == 0) {
                               return titleElement;
                             }
                             if (index - 1 < _labs.length) {
-                              return LabElement(element: _labs[index - 1]);
+                              return LabElement(element: _labs[index - 1], user: _username, refresh: () async { await _refreshLabs(); },);
                             }
-                            if (index == _labs.length + 1) {
+                            if (index == _labs.length + 1 ||
+                                index == _labs.length + 4) {
                               return const SizedBox(
                                 height: 40,
+                              );
+                            }
+                            if (index == _labs.length + 3) {
+                              return Container(
+                                margin: const EdgeInsets.all(16.0),
+                                child: const Center(
+                                  child: Text(
+                                    'Tap to join a lab',
+                                    style: TextStyle(
+                                      color: Colors.white54,
+                                    ),
+                                  ),
+                                ),
                               );
                             }
                             return FloatingActionButton(

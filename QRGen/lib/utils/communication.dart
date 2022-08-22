@@ -11,16 +11,21 @@ import '../values.dart';
 
 class Communication {
   static Future<bool> logIn(String username, String password) async {
-    final response = await http.get(Uri.parse('${Values.serverAddress}/login'),
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $username:$password'
-        }).timeout(const Duration(seconds: 3), onTimeout: () {
+    final response =
+        await http.post(Uri.parse('${Values.serverAddress}/login'), headers: {
+      HttpHeaders.contentTypeHeader:
+          'application/x-www-form-urlencoded; charset=UTF-8'
+    }, body: {
+      'username': username,
+      'password': password
+    }).timeout(const Duration(seconds: 3), onTimeout: () {
       throw const CommunicationException(message: 'Cannot connect to server');
     });
 
     if (response.statusCode == 200) {
       Preferences.setUsername(username);
       Preferences.setPassword(password);
+      Preferences.setToken(response.body);
       return true;
     } else {
       throw const CommunicationException(message: 'Failed to login');
@@ -41,20 +46,21 @@ class Communication {
   static Future<bool> logOut() async {
     Preferences.setUsername('');
     Preferences.setPassword('');
+    Preferences.setToken('');
     return true;
   }
 
   static Future<List<QRCode>> requestCodes() async {
-    final String username = await Preferences.getUsername();
-    final String password = await Preferences.getPassword();
+    String token = await Preferences.getToken();
 
-    if (username == '' || password == '') {
-      throw const CommunicationException(message: 'Invalid credentials');
+    if (token == '') {
+      await logInWithSavedCredentials();
+      token = await Preferences.getToken();
     }
 
     final response = await http.get(Uri.parse('${Values.serverAddress}/codes'),
         headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $username:$password'
+          HttpHeaders.authorizationHeader: 'Bearer $token'
         }).timeout(const Duration(seconds: 3), onTimeout: () {
       throw const CommunicationException(message: 'Cannot connect to server');
     });
@@ -68,16 +74,16 @@ class Communication {
   }
 
   static Future<List<Lab>> requestLabs() async {
-    final String username = await Preferences.getUsername();
-    final String password = await Preferences.getPassword();
+    String token = await Preferences.getToken();
 
-    if (username == '' || password == '') {
-      throw const CommunicationException(message: 'Invalid credentials');
+    if (token == '') {
+      await logInWithSavedCredentials();
+      token = await Preferences.getToken();
     }
 
     final response = await http.get(Uri.parse('${Values.serverAddress}/labs'),
         headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $username:$password'
+          HttpHeaders.authorizationHeader: 'Bearer $token'
         }).timeout(const Duration(seconds: 3), onTimeout: () {
       throw const CommunicationException(message: 'Cannot connect to server');
     });
@@ -91,16 +97,16 @@ class Communication {
   }
 
   static Future<void> joinLab(String code) async {
-    final String username = await Preferences.getUsername();
-    final String password = await Preferences.getPassword();
+    String token = await Preferences.getToken();
 
-    if (username == '' || password == '') {
-      throw const CommunicationException(message: 'Invalid credentials');
+    if (token == '') {
+      await logInWithSavedCredentials();
+      token = await Preferences.getToken();
     }
 
     final response = await http
         .get(Uri.parse('${Values.serverAddress}/labs/join/$code'), headers: {
-      HttpHeaders.authorizationHeader: 'Bearer $username:$password'
+      HttpHeaders.authorizationHeader: 'Bearer $token'
     }).timeout(const Duration(seconds: 3), onTimeout: () {
       throw const CommunicationException(message: 'Cannot connect to server');
     });
@@ -110,18 +116,41 @@ class Communication {
     }
   }
 
-  static Future<Lab> kickParticipant(Lab lab, int participant) async {
-    final String username = await Preferences.getUsername();
-    final String password = await Preferences.getPassword();
+  static Future<Lab> managePending(Lab lab, String participant, bool accept) async {
+    String token = await Preferences.getToken();
 
-    if (username == '' || password == '') {
-      throw const CommunicationException(message: 'Invalid credentials');
+    if (token == '') {
+      await logInWithSavedCredentials();
+      token = await Preferences.getToken();
     }
 
     final response = await http.get(
-        Uri.parse('${Values.serverAddress}/labs/kick/${lab.id}/$participant'),
+        Uri.parse('${Values.serverAddress}/labs/pending/${lab.code}/$participant/${accept ? '1' : '0'}'),
         headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $username:$password'
+          HttpHeaders.authorizationHeader: 'Bearer $token'
+        }).timeout(const Duration(seconds: 3), onTimeout: () {
+      throw const CommunicationException(message: 'Cannot connect to server');
+    });
+
+    if (response.statusCode == 200) {
+      return Lab.fromJson(jsonDecode(response.body));
+    } else {
+      throw const CommunicationException(message: 'Failed to accept/reject pending');
+    }
+  }
+
+  static Future<Lab> kickParticipant(Lab lab, String participant) async {
+    String token = await Preferences.getToken();
+
+    if (token == '') {
+      await logInWithSavedCredentials();
+      token = await Preferences.getToken();
+    }
+
+    final response = await http.get(
+        Uri.parse('${Values.serverAddress}/labs/kick/${lab.code}/$participant'),
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token'
         }).timeout(const Duration(seconds: 3), onTimeout: () {
       throw const CommunicationException(message: 'Cannot connect to server');
     });

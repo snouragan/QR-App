@@ -4,6 +4,7 @@ class Preferences {
 
   static const String usernameKey = 'username';
   static const String passwordKey = 'password';
+  static const String tokenKey = 'token';
 
   static Future<String> getUsername() async {
     final prefs = await SharedPreferences.getInstance();
@@ -23,5 +24,15 @@ class Preferences {
   static Future<void> setPassword(String value) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(passwordKey, value);
+  }
+
+  static Future<String> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getString(tokenKey) ?? '');
+  }
+
+  static Future<void> setToken(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(tokenKey, value);
   }
 }
