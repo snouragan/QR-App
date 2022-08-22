@@ -8,7 +8,9 @@ import '../utils/display.dart';
 import '../utils/preferences.dart';
 
 class LabList extends StatefulWidget {
-  const LabList({Key? key}) : super(key: key);
+  const LabList({Key? key, required this.themeCallback}) : super(key: key);
+
+  final Function themeCallback;
 
   @override
   State<LabList> createState() => _LabListState();
@@ -27,6 +29,9 @@ class _LabListState extends State<LabList> {
   // QR CODES
   Future<void> _refreshLabs() async {
     try {
+      final theme = await Preferences.getTheme();
+      widget.themeCallback(theme);
+
       final labs = await Communication.requestLabs();
       setState(() {
         _labs = labs;
@@ -86,6 +91,18 @@ class _LabListState extends State<LabList> {
     });
   }
 
+  String getGreeting() {
+    final now = DateTime.now();
+
+    if (now.hour < 12) {
+      return 'Good morning';
+    }
+    if (now.hour < 18) {
+      return 'Good afternoon';
+    }
+    return 'Good evening';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -94,7 +111,37 @@ class _LabListState extends State<LabList> {
 
   @override
   Widget build(BuildContext context) {
-    final titleElement = PageTitle(text: 'Hello, $_username');
+    final titleElement = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(
+            top: 60.0,
+            left: 32.0,
+            right: 32.0,
+          ),
+          child: Text(
+            '${getGreeting()},',
+            style: Theme.of(context).textTheme.headline6,
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.only(
+            bottom: 30.0,
+            left: 32.0,
+            right: 32.0,
+          ),
+          child: Text(
+            _username,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: Theme.of(context).textTheme.headline6?.fontSize,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+      ],
+    );
 
     return FutureBuilder(
         future: _initLabs,
@@ -199,7 +246,13 @@ class _LabListState extends State<LabList> {
                               return titleElement;
                             }
                             if (index - 1 < _labs.length) {
-                              return LabElement(element: _labs[index - 1], user: _username, refresh: () async { await _refreshLabs(); },);
+                              return LabElement(
+                                element: _labs[index - 1],
+                                user: _username,
+                                refresh: () async {
+                                  await _refreshLabs();
+                                },
+                              );
                             }
                             if (index == _labs.length + 1 ||
                                 index == _labs.length + 4) {
@@ -210,12 +263,11 @@ class _LabListState extends State<LabList> {
                             if (index == _labs.length + 3) {
                               return Container(
                                 margin: const EdgeInsets.all(16.0),
-                                child: const Center(
+                                child: Center(
                                   child: Text(
                                     'Tap to join a lab',
-                                    style: TextStyle(
-                                      color: Colors.white54,
-                                    ),
+                                    style:
+                                        Theme.of(context).textTheme.headline3,
                                   ),
                                 ),
                               );

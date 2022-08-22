@@ -29,16 +29,16 @@ class _LabDetailsState extends State<LabDetails> {
     return '$count user${count == 1 ? '' : 's'}${_lab.owner == widget.user && _lab.pending.isNotEmpty ? ', ${_lab.pending.length} pending' : ''}';
   }
 
-  List<Widget> generateParticipantList(Function update) {
+  List<Widget> generateParticipantList() {
     final List<Widget> participants = [];
 
     if (_lab.owner == widget.user) {
       if (_lab.pending.isNotEmpty) {
         participants.add(Container(
           margin: const EdgeInsets.all(8.0),
-          child: const Text(
-            'Pending',
-            style: TextStyle(fontSize: 20.0),
+          child: Text(
+            'Pending:',
+            style: Theme.of(context).textTheme.headline3,
           ),
         ));
       }
@@ -48,7 +48,7 @@ class _LabDetailsState extends State<LabDetails> {
           height: 64,
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            color: Colors.white10,
+            color: Theme.of(context).cardTheme.surfaceTintColor,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(i == 0 ? 10.0 : 0.0),
               topRight: Radius.circular(i == 0 ? 10.0 : 0.0),
@@ -64,7 +64,7 @@ class _LabDetailsState extends State<LabDetails> {
             children: [
               Text(
                 _lab.pending[i],
-                style: const TextStyle(fontSize: 20.0),
+                style: Theme.of(context).textTheme.subtitle1,
               ),
               const Spacer(),
               TextButton(
@@ -72,7 +72,7 @@ class _LabDetailsState extends State<LabDetails> {
                   try {
                     Lab newLab = await Communication.managePending(
                         _lab, _lab.pending[i], true);
-                    update(() {
+                    setState(() {
                       _lab = newLab;
                       widget.refresh();
                     });
@@ -80,14 +80,17 @@ class _LabDetailsState extends State<LabDetails> {
                     Display.showDismissibleSnackBar(context, e.toString());
                   }
                 },
-                child: const Text('ACCEPT'),
+                child: Text(
+                  'ACCEPT',
+                  style: Theme.of(context).textTheme.button,
+                ),
               ),
               TextButton(
                 onPressed: () async {
                   try {
                     Lab newLab = await Communication.managePending(
                         _lab, _lab.pending[i], false);
-                    update(() {
+                    setState(() {
                       _lab = newLab;
                       widget.refresh();
                     });
@@ -95,7 +98,10 @@ class _LabDetailsState extends State<LabDetails> {
                     Display.showDismissibleSnackBar(context, e.toString());
                   }
                 },
-                child: const Text('REJECT'),
+                child: Text(
+                  'REJECT',
+                  style: Theme.of(context).textTheme.button,
+                ),
               ),
             ],
           ),
@@ -105,9 +111,9 @@ class _LabDetailsState extends State<LabDetails> {
       if (_lab.participants.isNotEmpty && _lab.pending.isNotEmpty) {
         participants.add(Container(
           margin: const EdgeInsets.all(8.0),
-          child: const Text(
-            'Participants',
-            style: TextStyle(fontSize: 20.0),
+          child: Text(
+            'Participants:',
+            style: Theme.of(context).textTheme.headline3,
           ),
         ));
       }
@@ -118,7 +124,7 @@ class _LabDetailsState extends State<LabDetails> {
         height: 64,
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: Colors.white10,
+          color: Theme.of(context).cardTheme.surfaceTintColor,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(i == 0 ? 10.0 : 0.0),
             topRight: Radius.circular(i == 0 ? 10.0 : 0.0),
@@ -134,7 +140,7 @@ class _LabDetailsState extends State<LabDetails> {
           children: [
             Text(
               '${_lab.participants[i]}${_lab.participants[i] == widget.user ? ' (you)' : ''}',
-              style: const TextStyle(fontSize: 20.0),
+              style: Theme.of(context).textTheme.subtitle1,
             ),
             const Spacer(),
             _lab.owner == widget.user
@@ -143,7 +149,7 @@ class _LabDetailsState extends State<LabDetails> {
                       try {
                         Lab newLab = await Communication.kickParticipant(
                             _lab, _lab.participants[i]);
-                        update(() {
+                        setState(() {
                           _lab = newLab;
                           widget.refresh();
                         });
@@ -151,7 +157,10 @@ class _LabDetailsState extends State<LabDetails> {
                         Display.showDismissibleSnackBar(context, e.toString());
                       }
                     },
-                    child: const Text('KICK'),
+                    child: Text(
+                      'KICK',
+                      style: Theme.of(context).textTheme.button,
+                    ),
                   )
                 : const Spacer(),
           ],
@@ -170,103 +179,101 @@ class _LabDetailsState extends State<LabDetails> {
 
   @override
   Widget build(BuildContext context) {
-    return StatefulBuilder(builder: (BuildContext context, StateSetter update) {
-      return Wrap(
-        children: [
-          Container(
-            margin: const EdgeInsets.all(16.0),
-            padding: const EdgeInsets.only(
-                left: 32.0, right: 32.0, top: 8.0, bottom: 16.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.0),
-              color: const Color(0xff1c1c1c),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(
+    return Wrap(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.only(
+            left: 24.0,
+            right: 24.0,
+            top: 8.0,
+            bottom: 16.0,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10.0),
+            color: Theme.of(context).cardTheme.color,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Icon(
                       Icons.keyboard_arrow_down_rounded,
                       size: 50,
                     ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  _lab.name,
-                  style: const TextStyle(fontSize: 40.0),
-                  textAlign: TextAlign.start,
-                ),
-                const SizedBox(
-                  height: 40,
-                ),
-                ListTile(
-                  leading: const Icon(Icons.access_time_rounded),
-                  title: const Text(
-                    'Date',
-                    style: TextStyle(fontSize: 28.0),
                   ),
-                  subtitle: Text(
-                    '${Display.parseDate(_lab.start)} - ${Display.parseDate(_lab.end)}',
-                    style: const TextStyle(
-                      fontSize: 20.0,
-                      color: Colors.white70,
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Text(
+                _lab.name,
+                style: Theme.of(context).textTheme.headline1,
+                textAlign: TextAlign.start,
+              ),
+              const SizedBox(
+                height: 40,
+              ),
+              ListTile(
+                leading: const Icon(Icons.access_time_rounded),
+                title: Text(
+                  'Date',
+                  style: Theme.of(context).textTheme.headline2,
+                ),
+                subtitle: Text(
+                  '${Display.parseDate(_lab.start)} - ${Display.parseDate(_lab.end)}',
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              ListTile(
+                leading: const Icon(Icons.lock),
+                title: Text(
+                  'Owner',
+                  style: Theme.of(context).textTheme.headline2,
+                ),
+                subtitle: Text(
+                  '${_lab.owner}${_lab.owner == widget.user ? ' (you)' : ''}',
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              ExpansionTile(
+                leading: const Icon(Icons.account_circle_rounded),
+                title: Text(
+                  'Participants',
+                  style: Theme.of(context).textTheme.headline2,
+                ),
+                subtitle: Text(
+                  getParticipantCountString(),
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8.0),
+                    height: 400,
+                    child: ListView(
+                      children: generateParticipantList(),
                     ),
                   ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                ListTile(
-                  leading: const Icon(Icons.lock),
-                  title: const Text(
-                    'Owner',
-                    style: TextStyle(fontSize: 28.0),
-                  ),
-                  subtitle: Text(
-                    '${_lab.owner}${_lab.owner == widget.user ? ' (you)' : ''}',
-                    style: const TextStyle(
-                      fontSize: 20.0,
-                      color: Colors.white70,
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                ExpansionTile(
-                  leading: const Icon(Icons.account_circle_rounded),
-                  title: const Text(
-                    'Participants',
-                    style: TextStyle(fontSize: 28.0),
-                  ),
-                  subtitle: Text(
-                    getParticipantCountString(),
-                    style: const TextStyle(
-                      fontSize: 20.0,
-                      color: Colors.white70,
-                    ),
-                  ),
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8.0),
-                      height: 400,
-                      child: ListView(
-                        children: generateParticipantList(update),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          )
-        ],
-      );
-    });
+                ],
+              ),
+            ],
+          ),
+        )
+      ],
+    );
   }
 }

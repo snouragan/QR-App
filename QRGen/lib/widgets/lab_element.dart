@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:qrgen/classes/lab.dart';
 import 'package:qrgen/widgets/lab_details.dart';
 
-
 class LabElement extends StatefulWidget {
-  const LabElement({Key? key, required this.element, required this.user, required this.refresh})
+  const LabElement(
+      {Key? key,
+      required this.element,
+      required this.user,
+      required this.refresh})
       : super(key: key);
 
   final Lab element;
@@ -28,7 +31,7 @@ class _LabElementState extends State<LabElement> {
       margin: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(4.0),
-        color: const Color(0xff1c1c1c),
+        color: Theme.of(context).cardTheme.color,
       ),
       child: InkWell(
         onTap: () {
@@ -36,7 +39,11 @@ class _LabElementState extends State<LabElement> {
               isScrollControlled: true,
               context: context,
               builder: (BuildContext context) {
-                return LabDetails(lab: widget.element, user: widget.user, refresh: widget.refresh,);
+                return LabDetails(
+                  lab: widget.element,
+                  user: widget.user,
+                  refresh: widget.refresh,
+                );
               });
         },
         child: Container(
@@ -53,12 +60,11 @@ class _LabElementState extends State<LabElement> {
                   ),
                   child: const Icon(
                     Icons.qr_code,
-                    color: Colors.white,
                     size: 100,
                   )),
               Text(
                 widget.element.name,
-                style: const TextStyle(fontSize: 40.0),
+                style: Theme.of(context).textTheme.headline1,
               )
             ],
           ),

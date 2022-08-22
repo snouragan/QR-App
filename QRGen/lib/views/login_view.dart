@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qrgen/widgets/page_title.dart';
 
 class LoginView extends StatefulWidget {
-  const LoginView(
-      {Key? key, required this.logInCallback})
-      : super(key: key);
+  const LoginView({Key? key, required this.logInCallback}) : super(key: key);
 
   final Function logInCallback;
 
@@ -22,7 +20,9 @@ class _LoginViewState extends State<LoginView> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const PageTitle(text: 'Log In'),
+          const PageTitle(
+            text: 'Log In',
+          ),
           Container(
             padding: const EdgeInsets.only(left: 32.0, right: 32.0),
             child: TextField(
@@ -49,7 +49,7 @@ class _LoginViewState extends State<LoginView> {
                   onPressed: () {
                     widget.logInCallback(loginUser, loginPassword);
                   },
-                  child: const Text('LOG IN')),
+                  child: Text('LOG IN', style: Theme.of(context).textTheme.button)),
             ],
           ),
         ],

@@ -10,7 +10,9 @@ import 'package:qrgen/widgets/settings.dart';
 import '../utils/preferences.dart';
 
 class MainView extends StatefulWidget {
-  const MainView({Key? key}) : super(key: key);
+  const MainView({Key? key, required this.themeCallback}) : super(key: key);
+
+  final Function themeCallback;
 
   @override
   State<MainView> createState() => _MainViewState();
@@ -58,6 +60,9 @@ class _MainViewState extends State<MainView> {
 
   Future<void> _init() async {
     try {
+      final theme = await Preferences.getTheme();
+      widget.themeCallback(theme);
+
       await Communication.logInWithSavedCredentials();
       String usr = await Preferences.getUsername();
 
@@ -91,14 +96,12 @@ class _MainViewState extends State<MainView> {
         child: !_loggedIn
             ? LoginView(logInCallback: _logIn)
             : _viewIndex == 0
-                ? const LabList()
+                ? LabList(themeCallback: widget.themeCallback)
                 : Settings(
-                    user: _user, loggedIn: _loggedIn, logoutCallback: _logOut),
+                    user: _user, loggedIn: _loggedIn, logoutCallback: _logOut, themeCallback: widget.themeCallback,),
       ),
       bottomNavigationBar: _loggedIn
           ? BottomNavigationBar(
-              showSelectedLabels: false,
-              showUnselectedLabels: false,
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                     icon: Icon(Icons.qr_code, size: 40), label: 'Labs'),
