@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:qrgen/classes/lab.dart';
 
 import '../utils/communication.dart';
@@ -19,6 +20,7 @@ class LabDetails extends StatefulWidget {
 
 class _LabDetailsState extends State<LabDetails> {
   late Lab _lab;
+  bool _showQR = false;
 
   String getParticipantCountString() {
     int count = _lab.participants.length;
@@ -214,62 +216,109 @@ class _LabDetailsState extends State<LabDetails> {
               const SizedBox(
                 height: 20,
               ),
-              Text(
-                _lab.name,
-                style: Theme.of(context).textTheme.headline1,
-                textAlign: TextAlign.start,
+              Row(
+                children: [
+                  Text(
+                    _lab.name,
+                    style: Theme.of(context).textTheme.headline1,
+                    textAlign: TextAlign.start,
+                  ),
+                  const Spacer(),
+                  ...(_lab.qr != -1
+                      ? [
+                          InkWell(
+                            onTap: () {
+                              setState(() {
+                                _showQR = !_showQR;
+                              });
+                            },
+                            child: Icon(_showQR
+                                ? Icons.info_outline_rounded
+                                : Icons.qr_code),
+                          ),
+                        ]
+                      : [])
+                ],
               ),
               const SizedBox(
                 height: 40,
               ),
-              ListTile(
-                leading: const Icon(Icons.access_time_rounded),
-                title: Text(
-                  'Date',
-                  style: Theme.of(context).textTheme.headline2,
-                ),
-                subtitle: Text(
-                  '${Display.parseDate(_lab.start)} - ${Display.parseDate(_lab.end)}',
-                  style: Theme.of(context).textTheme.subtitle1,
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              ListTile(
-                leading: const Icon(Icons.lock),
-                title: Text(
-                  'Owner',
-                  style: Theme.of(context).textTheme.headline2,
-                ),
-                subtitle: Text(
-                  '${_lab.owner}${_lab.owner == widget.user ? ' (you)' : ''}',
-                  style: Theme.of(context).textTheme.subtitle1,
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              ExpansionTile(
-                leading: const Icon(Icons.account_circle_rounded),
-                title: Text(
-                  'Participants',
-                  style: Theme.of(context).textTheme.headline2,
-                ),
-                subtitle: Text(
-                  getParticipantCountString(),
-                  style: Theme.of(context).textTheme.subtitle1,
-                ),
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    height: 400,
-                    child: ListView(
-                      children: generateParticipantList(),
-                    ),
-                  ),
-                ],
-              ),
+              ...(_showQR
+                  ? [
+                      Center(
+                        child: QrImage(
+                          data: '${_lab.qr}',
+                          version: 1,
+                          size: 300,
+                          foregroundColor:
+                              Theme.of(context).textTheme.headline1?.color,
+                        ),
+                      ),
+                    ]
+                  : [
+                      ListTile(
+                        leading: const Icon(Icons.key),
+                        title: Text(
+                          'Join Code',
+                          style: Theme.of(context).textTheme.headline2,
+                        ),
+                        subtitle: Text(
+                          _lab.code,
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.access_time_rounded),
+                        title: Text(
+                          'Date',
+                          style: Theme.of(context).textTheme.headline2,
+                        ),
+                        subtitle: Text(
+                          Display.parseDate(_lab.start, _lab.end),
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.lock),
+                        title: Text(
+                          'Owner',
+                          style: Theme.of(context).textTheme.headline2,
+                        ),
+                        subtitle: Text(
+                          '${_lab.owner}${_lab.owner == widget.user ? ' (you)' : ''}',
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      ExpansionTile(
+                        leading: const Icon(Icons.account_circle_rounded),
+                        title: Text(
+                          'Participants',
+                          style: Theme.of(context).textTheme.headline2,
+                        ),
+                        subtitle: Text(
+                          getParticipantCountString(),
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8.0),
+                            height: 400,
+                            child: ListView(
+                              children: generateParticipantList(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ])
             ],
           ),
         )

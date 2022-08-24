@@ -4,7 +4,7 @@
   "description": "Backend for QR app.",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --ignore \"data/*.json\" index.js",
+    "start": "nodemon --ignore \"/**/*.json\" index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "janelu",

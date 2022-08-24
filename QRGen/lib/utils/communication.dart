@@ -91,7 +91,10 @@ class Communication {
     if (response.statusCode == 200) {
       final List<dynamic> labList = jsonDecode(response.body);
       return labList.map((c) => Lab.fromJson(c)).toList();
-    } else {
+    } else if (response.statusCode == 401) {
+      await logInWithSavedCredentials();
+      await requestLabs();
+    }{
       throw const CommunicationException(message: 'Failed to load labs');
     }
   }
